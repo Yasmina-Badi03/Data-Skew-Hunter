@@ -1,0 +1,21 @@
+# Fichiers de données lourds (Ignorés pour GitHub)
+uploads/
+results/
+*.csv
+*.parquet
+*.json
+*.orc
+
+# Fichiers Python compilés
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environnements virtuels
+venv/
+env/
+.env
+
+# Fichiers système
+.DS_Store
+Thumbs.db

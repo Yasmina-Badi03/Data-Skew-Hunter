@@ -1,0 +1,7 @@
+streamlit
+pandas
+pyspark==3.5.1
+plotly
+pyarrow
+fpdf2
+matplotlib

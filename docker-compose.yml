@@ -1,0 +1,122 @@
+services:
+
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    hostname: namenode
+    environment:
+      - CLUSTER_NAME=test
+    env_file:
+      - hadoop.env
+    ports:
+      - "9870:9870"
+      - "9000:9000"
+    networks:
+      - bigdata
+
+  datanode1:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode1
+    hostname: datanode1
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - hadoop.env
+    depends_on:
+      - namenode
+    networks:
+      - bigdata
+
+  datanode2:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode2
+    hostname: datanode2
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - hadoop.env
+    depends_on:
+      - namenode
+    networks:
+      - bigdata
+
+  datanode3:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode3
+    hostname: datanode3
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - hadoop.env
+    depends_on:
+      - namenode
+    networks:
+      - bigdata
+
+  spark-master:
+    build: .
+    container_name: spark-master
+    hostname: spark-master
+    command:
+      - /opt/spark/bin/spark-class
+      - org.apache.spark.deploy.master.Master
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    volumes:
+      - .:/app
+    networks:
+      - bigdata
+
+  spark-worker-1:
+    build: .
+    container_name: spark-worker-1
+    hostname: spark-worker-1
+    command:
+      - /opt/spark/bin/spark-class
+      - org.apache.spark.deploy.worker.Worker
+      - spark://spark-master:7077
+    volumes:
+      - .:/app
+    depends_on:
+      - spark-master
+    networks:
+      - bigdata
+
+  spark-worker-2:
+    build: .
+    container_name: spark-worker-2
+    hostname: spark-worker-2
+    command:
+      - /opt/spark/bin/spark-class
+      - org.apache.spark.deploy.worker.Worker
+      - spark://spark-master:7077
+    volumes:
+      - .:/app
+    depends_on:
+      - spark-master
+    networks:
+      - bigdata
+
+  dashboard:
+    build: .
+    container_name: dataskew-hunter-dashboard
+    ports:
+      - "8501:8501"
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - PYSPARK_PYTHON=python3
+      - PYSPARK_DRIVER_PYTHON=python3
+    env_file:
+      - hadoop.env
+    volumes:
+      - .:/app
+    depends_on:
+      - spark-master
+      - namenode
+    networks:
+      - bigdata
+
+networks:
+  bigdata:
+    driver: bridge
